@@ -55,25 +55,17 @@ var RoaverWidget = (() => {
           this.applyTheme();
           this.render();
         }
-        async waitForApi(retries = 3) {
-          for (let i = 0; i < retries; i++) {
+        async waitForApi() {
+          const baseUrl = this.config.apiUrl.replace(/\/api$/, "");
+          const healthUrl = `${baseUrl}/health`;
+          for (let i = 0; i < 3; i++) {
             try {
-              const controller = new AbortController();
-              const timeoutId = setTimeout(() => controller.abort(), 1e4);
-              const response = await fetch(`${this.config.apiUrl}/health`, {
-                signal: controller.signal
-              });
-              clearTimeout(timeoutId);
-              if (response.ok) {
-                console.log("\u2713 API connected");
-                return true;
-              }
+              const response = await fetch(healthUrl);
+              if (response.ok) return true;
             } catch (error) {
-              console.log(`API not ready, attempt ${i + 1}/${retries}...`);
-              if (i < retries - 1) {
-                await new Promise((resolve) => setTimeout(resolve, 2e3));
-              }
+              console.warn(`Health check attempt ${i + 1} failed:`, error);
             }
+            if (i < 2) await new Promise((resolve) => setTimeout(resolve, 2e3));
           }
           return false;
         }
