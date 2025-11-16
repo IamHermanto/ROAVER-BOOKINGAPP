@@ -4,6 +4,12 @@ import dotenv from 'dotenv';
 import path from 'path';
 import pool from './db';
 
+// Import routes
+import vehiclesRouter from './routes/vehicles';
+import bookingsRouter from './routes/bookings';
+import clientsRouter from './routes/clients';
+import depotsRouter from './routes/depots';
+
 // Load environment variables from root .env
 dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
@@ -24,9 +30,27 @@ app.get('/health', async (req: Request, res: Response) => {
   }
 });
 
-// API routes will go here
-app.get('/api/test', (req: Request, res: Response) => {
-  res.json({ message: 'API is working!' });
+// API routes
+app.use('/api/vehicles', vehiclesRouter);
+app.use('/api/bookings', bookingsRouter);
+app.use('/api/clients', clientsRouter);
+app.use('/api/depots', depotsRouter);
+
+// Root endpoint
+app.get('/', (req: Request, res: Response) => {
+  res.json({ 
+    message: 'ROAVER Booking API',
+    endpoints: [
+      'GET /health',
+      'GET /api/vehicles/search',
+      'GET /api/vehicles/:id',
+      'POST /api/bookings',
+      'GET /api/bookings/:id',
+      'GET /api/clients/:clientId/config',
+      'GET /api/depots',
+      'GET /api/depots/city/:city'
+    ]
+  });
 });
 
 export default app;
