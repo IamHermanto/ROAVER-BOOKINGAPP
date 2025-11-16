@@ -24,11 +24,8 @@ export class BookingWidget {
   }
 
   async init() {
-    // Load client configuration for theming
     await this.loadClientConfig();
-    // Apply theme
     this.applyTheme();
-    // Render initial search view
     this.render();
   }
 
@@ -225,14 +222,12 @@ export class BookingWidget {
     const transmission = (document.getElementById('transmission') as HTMLSelectElement).value;
     const vehicleType = (document.getElementById('vehicle-type') as HTMLSelectElement).value;
 
-    // Save search params for booking
     this.searchParams = {
       pickup_date: pickupDate,
       dropoff_date: dropoffDate,
       number_of_people: people
     };
 
-    // Build query params
     const params = new URLSearchParams({
       pickup_date: pickupDate,
       dropoff_date: dropoffDate,
@@ -248,12 +243,37 @@ export class BookingWidget {
 
       if (data.success) {
         this.searchResults = data.vehicles;
+        
+        // Track this search as a quote
+        await this.trackQuote();
+        
         this.currentView = 'results';
         this.render();
       }
     } catch (error) {
       console.error('Search failed:', error);
       alert('Failed to search vehicles. Please try again.');
+    }
+  }
+
+  private async trackQuote() {
+    try {
+      await fetch(`${this.config.apiUrl}/quotes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          client_id: this.config.clientId,
+          pickup_location: 'Not specified',
+          dropoff_location: 'Same as pickup',
+          pickup_date: this.searchParams.pickup_date,
+          dropoff_date: this.searchParams.dropoff_date,
+          number_of_people: parseInt(this.searchParams.number_of_people)
+        })
+      });
+    } catch (error) {
+      console.error('Failed to track quote:', error);
     }
   }
 
@@ -395,8 +415,6 @@ export class BookingWidget {
     const guestEmail = (document.getElementById('guest-email') as HTMLInputElement).value;
     const guestPhone = (document.getElementById('guest-phone') as HTMLInputElement).value;
 
-    // For now, we'll use the first depot as pickup/dropoff
-    // In a real app, this would be selected by the user
     const depotsResponse = await fetch(`${this.config.apiUrl}/depots`);
     const depotsData = await depotsResponse.json();
     const firstDepot = depotsData.depots[0];
@@ -437,7 +455,6 @@ export class BookingWidget {
             </div>
           `;
           
-          // Hide the form
           const form = document.getElementById('booking-form');
           if (form) form.style.display = 'none';
         }

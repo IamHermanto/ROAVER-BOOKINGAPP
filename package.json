@@ -8,6 +8,8 @@
   ],
   "scripts": {
     "build": "npm run build --workspaces",
+    "build:api": "npm run build --workspace=@booking-widget/api",
+    "start": "npm run start --workspace=@booking-widget/api",
     "dev:shared": "npm run dev --workspace=@booking-widget/shared",
     "dev:api": "npm run dev --workspace=@booking-widget/api",
     "dev:widget": "npm run dev --workspace=@booking-widget/widget"

@@ -9,6 +9,7 @@ import vehiclesRouter from './routes/vehicles';
 import bookingsRouter from './routes/bookings';
 import clientsRouter from './routes/clients';
 import depotsRouter from './routes/depots';
+import quotesRouter from './routes/quotes';  // NEW: Import quotes router
 
 // Load environment variables from root .env
 dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
@@ -35,6 +36,7 @@ app.use('/api/vehicles', vehiclesRouter);
 app.use('/api/bookings', bookingsRouter);
 app.use('/api/clients', clientsRouter);
 app.use('/api/depots', depotsRouter);
+app.use('/api/quotes', quotesRouter);  // NEW: Register quotes router
 
 // Root endpoint
 app.get('/', (req: Request, res: Response) => {
@@ -48,7 +50,10 @@ app.get('/', (req: Request, res: Response) => {
       'GET /api/bookings/:id',
       'GET /api/clients/:clientId/config',
       'GET /api/depots',
-      'GET /api/depots/city/:city'
+      'GET /api/depots/city/:city',
+      'POST /api/quotes',  // NEW: Add to endpoint list
+      'GET /api/quotes',   // NEW: Add to endpoint list
+      'GET /api/quotes/client/:clientId'  // NEW: Add to endpoint list
     ]
   });
 });
