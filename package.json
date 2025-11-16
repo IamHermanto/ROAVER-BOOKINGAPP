@@ -1,0 +1,30 @@
+{
+  "name": "roaver-bookingapp",
+  "version": "1.0.0",
+  "description": "Multi-operator campervan rental booking widget",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "dev:shared": "npm run dev --workspace=@booking-widget/shared",
+    "dev:api": "npm run dev --workspace=@booking-widget/api",
+    "dev:widget": "npm run dev --workspace=@booking-widget/widget"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IamHermanto/ROAVER-BOOKINGAPP.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/IamHermanto/ROAVER-BOOKINGAPP/issues"
+  },
+  "homepage": "https://github.com/IamHermanto/ROAVER-BOOKINGAPP#readme",
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  }
+}

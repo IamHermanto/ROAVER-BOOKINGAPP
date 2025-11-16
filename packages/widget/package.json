@@ -1,0 +1,13 @@
+{
+  "name": "@booking-widget/widget",
+  "version": "1.0.0",
+  "description": "Custom HTML rendering widget",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
