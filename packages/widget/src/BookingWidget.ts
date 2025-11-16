@@ -11,6 +11,8 @@ export class BookingWidget {
   private clientConfig: ClientConfig | null = null;
   private searchResults: VehicleSearchResult[] = [];
   private currentView: 'search' | 'results' | 'booking' = 'search';
+  private selectedVehicle: VehicleSearchResult | null = null;
+  private searchParams: any = null;
 
   constructor(containerId: string, config: WidgetConfig) {
     const element = document.getElementById(containerId);
@@ -67,6 +69,20 @@ export class BookingWidget {
       .booking-widget button.primary:hover {
         opacity: 0.9;
       }
+      .booking-widget button.secondary {
+        background-color: white;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+        padding: 12px 24px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 500;
+        margin-right: 10px;
+      }
+      .booking-widget button.secondary:hover {
+        background-color: #f9fafb;
+      }
       .booking-widget input, .booking-widget select {
         padding: 10px;
         border: 1px solid #ddd;
@@ -116,6 +132,25 @@ export class BookingWidget {
         border-radius: 12px;
         font-size: 12px;
         color: #6b7280;
+      }
+      .booking-widget .booking-summary {
+        background: #f9fafb;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+      }
+      .booking-widget .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+      }
+      .booking-widget .total-price {
+        font-size: 20px;
+        font-weight: bold;
+        color: var(--primary-color);
+        border-top: 2px solid #e5e7eb;
+        padding-top: 10px;
+        margin-top: 10px;
       }
     `;
     document.head.appendChild(style);
@@ -189,6 +224,13 @@ export class BookingWidget {
     const people = (document.getElementById('people') as HTMLInputElement).value;
     const transmission = (document.getElementById('transmission') as HTMLSelectElement).value;
     const vehicleType = (document.getElementById('vehicle-type') as HTMLSelectElement).value;
+
+    // Save search params for booking
+    this.searchParams = {
+      pickup_date: pickupDate,
+      dropoff_date: dropoffDate,
+      number_of_people: people
+    };
 
     // Build query params
     const params = new URLSearchParams({
@@ -267,15 +309,142 @@ export class BookingWidget {
 
     const bookBtn = card.querySelector('.book-btn');
     bookBtn?.addEventListener('click', () => {
-      console.log('Booking vehicle:', vehicle.id);
-      // Will implement booking form next
+      this.selectedVehicle = vehicle;
+      this.currentView = 'booking';
+      this.render();
     });
 
     return card;
   }
 
   private renderBookingForm() {
-    // Will implement in next step
-    this.container.innerHTML = '<h2>Booking Form</h2><p>Coming soon...</p>';
+    if (!this.selectedVehicle) return;
+
+    const form = document.createElement('div');
+    form.innerHTML = `
+      <h2>Complete Your Booking</h2>
+      
+      <div class="booking-summary">
+        <h3>${this.selectedVehicle.name}</h3>
+        <p style="color: #6b7280;">${this.selectedVehicle.operator_name}</p>
+        <div class="summary-row">
+          <span>Pick Up Date:</span>
+          <strong>${this.searchParams.pickup_date}</strong>
+        </div>
+        <div class="summary-row">
+          <span>Drop Off Date:</span>
+          <strong>${this.searchParams.dropoff_date}</strong>
+        </div>
+        <div class="summary-row">
+          <span>Number of People:</span>
+          <strong>${this.searchParams.number_of_people}</strong>
+        </div>
+        <div class="summary-row">
+          <span>Daily Rate:</span>
+          <strong>$${this.selectedVehicle.price_per_day}</strong>
+        </div>
+        <div class="summary-row">
+          <span>Number of Days:</span>
+          <strong>${this.selectedVehicle.days}</strong>
+        </div>
+        <div class="summary-row total-price">
+          <span>Total Price:</span>
+          <strong>$${this.selectedVehicle.total_price}</strong>
+        </div>
+      </div>
+
+      <form id="booking-form">
+        <div class="form-group">
+          <label for="guest-name">Full Name *</label>
+          <input type="text" id="guest-name" required />
+        </div>
+        <div class="form-group">
+          <label for="guest-email">Email Address *</label>
+          <input type="email" id="guest-email" required />
+        </div>
+        <div class="form-group">
+          <label for="guest-phone">Phone Number</label>
+          <input type="tel" id="guest-phone" />
+        </div>
+        <div style="margin-top: 20px;">
+          <button type="button" id="back-to-results" class="secondary">Back to Results</button>
+          <button type="submit" class="primary">Confirm Booking</button>
+        </div>
+      </form>
+      <div id="booking-result" style="margin-top: 20px;"></div>
+    `;
+
+    this.container.appendChild(form);
+
+    const backBtn = form.querySelector('#back-to-results');
+    backBtn?.addEventListener('click', () => {
+      this.currentView = 'results';
+      this.render();
+    });
+
+    const bookingForm = form.querySelector('#booking-form') as HTMLFormElement;
+    bookingForm.addEventListener('submit', (e) => this.handleBooking(e));
+  }
+
+  private async handleBooking(e: Event) {
+    e.preventDefault();
+
+    if (!this.selectedVehicle) return;
+
+    const guestName = (document.getElementById('guest-name') as HTMLInputElement).value;
+    const guestEmail = (document.getElementById('guest-email') as HTMLInputElement).value;
+    const guestPhone = (document.getElementById('guest-phone') as HTMLInputElement).value;
+
+    // For now, we'll use the first depot as pickup/dropoff
+    // In a real app, this would be selected by the user
+    const depotsResponse = await fetch(`${this.config.apiUrl}/depots`);
+    const depotsData = await depotsResponse.json();
+    const firstDepot = depotsData.depots[0];
+
+    const bookingData = {
+      client_id: this.config.clientId,
+      vehicle_id: this.selectedVehicle.id,
+      pickup_depot_id: firstDepot.id,
+      dropoff_depot_id: firstDepot.id,
+      pickup_date: this.searchParams.pickup_date,
+      dropoff_date: this.searchParams.dropoff_date,
+      guest_name: guestName,
+      guest_email: guestEmail,
+      guest_phone: guestPhone,
+      number_of_people: parseInt(this.searchParams.number_of_people)
+    };
+
+    try {
+      const response = await fetch(`${this.config.apiUrl}/bookings`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(bookingData)
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        const resultDiv = document.getElementById('booking-result');
+        if (resultDiv) {
+          resultDiv.innerHTML = `
+            <div style="background: #d1fae5; border: 2px solid #10b981; padding: 20px; border-radius: 8px;">
+              <h3 style="color: #065f46; margin-top: 0;">Booking Confirmed! ✓</h3>
+              <p>Your booking has been confirmed. Booking ID: <strong>${data.booking.id}</strong></p>
+              <p>A confirmation email will be sent to <strong>${guestEmail}</strong></p>
+              <button class="primary" style="margin-top: 10px;" onclick="location.reload()">Make Another Booking</button>
+            </div>
+          `;
+          
+          // Hide the form
+          const form = document.getElementById('booking-form');
+          if (form) form.style.display = 'none';
+        }
+      }
+    } catch (error) {
+      console.error('Booking failed:', error);
+      alert('Failed to create booking. Please try again.');
+    }
   }
 }
