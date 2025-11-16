@@ -1,10 +1,11 @@
 import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
 import pool from './db';
 
-// Load environment variables
-dotenv.config();
+// Load environment variables from root .env
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
 const app: Express = express();
 const PORT = process.env.API_PORT || 3000;
