@@ -46,10 +46,13 @@ export class BookingWidget {
     for (let i = 0; i < retries; i++) {
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
         
-        // Health endpoint is at /health not /api/health
-        const healthUrl = this.config.apiUrl.replace('/api', '/health');
+        // Get base URL by removing /api suffix
+        const apiUrl = this.config.apiUrl; // https://roaver-bookingapp.onrender.com/api
+        const baseUrl = apiUrl.endsWith('/api') ? apiUrl.slice(0, -4) : apiUrl;
+        const healthUrl = `${baseUrl}/health`;
+        
         const response = await fetch(healthUrl, {
           signal: controller.signal
         });
@@ -63,7 +66,7 @@ export class BookingWidget {
       } catch (error) {
         console.log(`API not ready, attempt ${i + 1}/${retries}...`);
         if (i < retries - 1) {
-          await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s between retries
+          await new Promise(resolve => setTimeout(resolve, 2000));
         }
       }
     }
