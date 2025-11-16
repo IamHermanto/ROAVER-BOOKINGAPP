@@ -42,36 +42,22 @@ export class BookingWidget {
     this.render();
   }
 
-  private async waitForApi(retries = 3): Promise<boolean> {
-    for (let i = 0; i < retries; i++) {
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
-        
-        // Get base URL by removing /api suffix
-        const apiUrl = this.config.apiUrl; // https://roaver-bookingapp.onrender.com/api
-        const baseUrl = apiUrl.endsWith('/api') ? apiUrl.slice(0, -4) : apiUrl;
-        const healthUrl = `${baseUrl}/health`;
-        
-        const response = await fetch(healthUrl, {
-          signal: controller.signal
-        });
-        
-        clearTimeout(timeoutId);
-        
-        if (response.ok) {
-          console.log('✓ API connected');
-          return true;
-        }
-      } catch (error) {
-        console.log(`API not ready, attempt ${i + 1}/${retries}...`);
-        if (i < retries - 1) {
-          await new Promise(resolve => setTimeout(resolve, 2000));
-        }
-      }
+  private async waitForApi(): Promise<boolean> {
+  // Strip /api and add /health
+  const baseUrl = this.config.apiUrl.replace(/\/api$/, '');
+  const healthUrl = `${baseUrl}/health`;
+  
+  for (let i = 0; i < 3; i++) {
+    try {
+      const response = await fetch(healthUrl);
+      if (response.ok) return true;
+    } catch (error) {
+      console.warn(`Health check attempt ${i + 1} failed:`, error);
     }
-    return false;
+    if (i < 2) await new Promise(resolve => setTimeout(resolve, 2000));
   }
+  return false;
+}
 
   private async loadClientConfig() {
     try {
