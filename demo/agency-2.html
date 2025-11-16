@@ -40,11 +40,11 @@
 
   <div id="booking-widget-container"></div>
 
-  <script src="../packages/widget/dist/browser.js"></script>
+  <script src="./browser.js"></script>
   <script>
     // Initialize the booking widget with Agency 2's theme
     const widget = new RoaverWidget.BookingWidget('booking-widget-container', {
-      apiUrl: 'http://localhost:3000/api',
+      apiUrl: 'https://roaver-bookingapp.onrender.com/api',
       clientId: '8e1f0272-2f72-4039-bc3c-c8a11b399ab8'
     });
 

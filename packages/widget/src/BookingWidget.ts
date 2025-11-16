@@ -24,9 +24,48 @@ export class BookingWidget {
   }
 
   async init() {
+    // Show loading state
+    this.container.innerHTML = '<div style="text-align: center; padding: 40px; font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif;">⏳ Loading booking system...</div>';
+    
+    // Wait for API to be ready
+    const apiReady = await this.waitForApi();
+    if (!apiReady) {
+      this.container.innerHTML = '<div style="text-align: center; padding: 40px; color: #ef4444; font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif;">❌ Unable to connect to booking system. Please try again later.</div>';
+      return;
+    }
+    
+    // Load client configuration for theming
     await this.loadClientConfig();
+    // Apply theme
     this.applyTheme();
+    // Render initial search view
     this.render();
+  }
+
+  private async waitForApi(retries = 3): Promise<boolean> {
+    for (let i = 0; i < retries; i++) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        
+        const response = await fetch(`${this.config.apiUrl}/health`, {
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (response.ok) {
+          console.log('✓ API connected');
+          return true;
+        }
+      } catch (error) {
+        console.log(`API not ready, attempt ${i + 1}/${retries}...`);
+        if (i < retries - 1) {
+          await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s between retries
+        }
+      }
+    }
+    return false;
   }
 
   private async loadClientConfig() {
@@ -222,12 +261,14 @@ export class BookingWidget {
     const transmission = (document.getElementById('transmission') as HTMLSelectElement).value;
     const vehicleType = (document.getElementById('vehicle-type') as HTMLSelectElement).value;
 
+    // Save search params for booking
     this.searchParams = {
       pickup_date: pickupDate,
       dropoff_date: dropoffDate,
       number_of_people: people
     };
 
+    // Build query params
     const params = new URLSearchParams({
       pickup_date: pickupDate,
       dropoff_date: dropoffDate,
@@ -238,15 +279,14 @@ export class BookingWidget {
     if (vehicleType) params.append('vehicle_type', vehicleType);
 
     try {
+      // Track the quote
+      await this.trackQuote(pickupDate, dropoffDate, people);
+
       const response = await fetch(`${this.config.apiUrl}/vehicles/search?${params}`);
       const data = await response.json();
 
       if (data.success) {
         this.searchResults = data.vehicles;
-        
-        // Track this search as a quote
-        await this.trackQuote();
-        
         this.currentView = 'results';
         this.render();
       }
@@ -256,7 +296,7 @@ export class BookingWidget {
     }
   }
 
-  private async trackQuote() {
+  private async trackQuote(pickupDate: string, dropoffDate: string, people: string) {
     try {
       await fetch(`${this.config.apiUrl}/quotes`, {
         method: 'POST',
@@ -266,10 +306,10 @@ export class BookingWidget {
         body: JSON.stringify({
           client_id: this.config.clientId,
           pickup_location: 'Not specified',
-          dropoff_location: 'Same as pickup',
-          pickup_date: this.searchParams.pickup_date,
-          dropoff_date: this.searchParams.dropoff_date,
-          number_of_people: parseInt(this.searchParams.number_of_people)
+          dropoff_location: 'Not specified',
+          pickup_date: pickupDate,
+          dropoff_date: dropoffDate,
+          number_of_people: parseInt(people)
         })
       });
     } catch (error) {
@@ -415,6 +455,8 @@ export class BookingWidget {
     const guestEmail = (document.getElementById('guest-email') as HTMLInputElement).value;
     const guestPhone = (document.getElementById('guest-phone') as HTMLInputElement).value;
 
+    // For now, we'll use the first depot as pickup/dropoff
+    // In a real app, this would be selected by the user
     const depotsResponse = await fetch(`${this.config.apiUrl}/depots`);
     const depotsData = await depotsResponse.json();
     const firstDepot = depotsData.depots[0];
@@ -455,6 +497,7 @@ export class BookingWidget {
             </div>
           `;
           
+          // Hide the form
           const form = document.getElementById('booking-form');
           if (form) form.style.display = 'none';
         }
