@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo Travel Agency 2 - Campervan Booking</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #f0fdf4;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    .header {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .header h1 {
+      margin: 0;
+      color: #065f46;
+    }
+    #booking-widget-container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      max-width: 1200px;
+      margin: 0 auto;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Demo Travel Agency 2</h1>
+    <p>Eco-friendly campervan adventures</p>
+  </div>
+
+  <div id="booking-widget-container"></div>
+
+  <script src="../packages/widget/dist/browser.js"></script>
+  <script>
+    // Initialize the booking widget with Agency 2's theme
+    const widget = new RoaverWidget.BookingWidget('booking-widget-container', {
+      apiUrl: 'http://localhost:3000/api',
+      clientId: '8e1f0272-2f72-4039-bc3c-c8a11b399ab8'
+    });
+
+    widget.init();
+  </script>
+</body>
+</html>

@@ -5,9 +5,12 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch"
+    "build:browser": "esbuild src/index.ts --bundle --outfile=dist/browser.js --format=iife --global-name=RoaverWidget"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "esbuild": "^0.24.2"
+  }
 }
