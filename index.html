@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ROAVER Booking Widget - Live Demos</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 40px 20px;
+      background: #f9fafb;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 40px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #1f2937;
+      margin-top: 0;
+    }
+    .demo-links {
+      display: grid;
+      gap: 20px;
+      margin-top: 30px;
+    }
+    .demo-card {
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 20px;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.2s;
+    }
+    .demo-card:hover {
+      border-color: #3B82F6;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .demo-card h2 {
+      margin: 0 0 10px 0;
+      color: #1f2937;
+    }
+    .demo-card p {
+      margin: 0;
+      color: #6b7280;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      margin-top: 10px;
+    }
+    .blue { background: #dbeafe; color: #1e40af; }
+    .green { background: #d1fae5; color: #065f46; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚐 ROAVER Booking Widget</h1>
+    <p>Multi-tenant campervan booking system demonstrating white-label architecture</p>
+    
+    <div class="demo-links">
+      <a href="./demo/index.html" class="demo-card">
+        <h2>Demo Travel Agency 1</h2>
+        <p>Experience the booking widget with blue theme</p>
+        <span class="badge blue">Blue Theme</span>
+      </a>
+      
+      <a href="./demo/agency-2.html" class="demo-card">
+        <h2>Demo Travel Agency 2</h2>
+        <p>Experience the booking widget with green theme</p>
+        <span class="badge green">Green Theme</span>
+      </a>
+    </div>
+
+    <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+      <p style="color: #6b7280; font-size: 14px;">
+        <strong>Note:</strong> The API runs on Render's free tier and may take 30-60 seconds to wake up on first load.
+      </p>
+    </div>
+  </div>
+</body>
+</html>
