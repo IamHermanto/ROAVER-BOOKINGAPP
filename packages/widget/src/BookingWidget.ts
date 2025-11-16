@@ -48,7 +48,9 @@ export class BookingWidget {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
         
-        const response = await fetch(`${this.config.apiUrl}/health`, {
+        // Health endpoint is at /health not /api/health
+        const healthUrl = this.config.apiUrl.replace('/api', '/health');
+        const response = await fetch(healthUrl, {
           signal: controller.signal
         });
         
